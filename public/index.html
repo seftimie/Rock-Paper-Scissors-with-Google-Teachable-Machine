@@ -1,0 +1,256 @@
+<!-- tailwind css -->
+<link href="css/tailwind.min.css" rel="stylesheet">
+
+<!-- vue js -->
+<script src="js/vue.js"></script>
+
+<!-- tensorflow js -->
+<script src="js/tf.min.js"></script>
+
+<!-- google teachablemachine -->
+<script src="js/teachablemachine-image.min.js"></script>
+
+<body>  
+
+  <!-- start game -->   
+  <div id="game">
+        <!-- start header -->
+        <div class="bg-gray-200">
+          <div class="max-w-screen-xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center lg:justify-between">
+
+              <!-- start welcome message -->
+              <h2 class="text-3xl leading-9 font-extrabold tracking-tight text-gray-900 sm:text-4xl sm:leading-10">
+                Ready to play
+                <br>
+                <span class="text-indigo-600">Rock Paper Scissors?</span>
+                <br/>
+                <p class="text-base font-light text-gray-600">by <span class="text-indigo-600 font-extrabold"><a href="https://www.linkedin.com/in/eftimiesilviudaniel/" target="_blank">ESD</a></span> with love for <span class="text-indigo-600 font-extrabold"><a href="https://www.youtube.com/channel/UCHV6pF1KjgCJB4M__4ZYISg/videos" target="_blank">Karl</a></span> & Neo (Vue JS, Tailwind, Laracast's illustrations & Google Teachable Machine)</p>
+              </h2>
+              <!-- end welcome message -->
+
+              <!-- start control game -->
+              <div class="mt-8 flex lg:flex-shrink-0 lg:mt-0">
+                  <!-- start play button -->
+
+                  <div class="inline-flex rounded-md shadow">
+                    <a href="#" v-on:click="enableButton" id="enableButton" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base leading-6 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:shadow-outline transition duration-150 ease-in-out">
+                      Enable Webcam
+                    </a>
+                  </div>
+
+                  <div class="ml-3 inline-flex rounded-md shadow">
+                    <a href="#" v-on:click="playButton"  id="playButton" class="hidden inline-flex items-center justify-center px-5 py-3 border border-transparent text-base leading-6 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:shadow-outline transition duration-150 ease-in-out">
+                      Play
+                    </a>
+                  </div>
+                  <!-- end play button -->
+
+                  <!-- start reset button -->
+                  <div class="ml-3 inline-flex rounded-md shadow">
+                    <a href="#" v-on:click="resetButton" id="resetButton"  class="hidden inline-flex items-center justify-center px-5 py-3 border border-transparent text-base leading-6 font-medium rounded-md text-indigo-600 bg-white hover:text-indigo-500 focus:outline-none focus:shadow-outline transition duration-150 ease-in-out">
+                      Reset
+                    </a>
+                  </div>
+                  <!-- end reset button -->
+              </div>
+              <!-- end control game -->
+
+          </div>
+        </div>
+        <!-- end header -->
+
+        <!-- start gameboard -->
+        <div class="bg-gray-900 text-white h-full">
+          <div class="flex items-baseline h-full">
+
+              <!-- start human box --->
+              <div class="items-center flex-1 text-gray-100 text-center bg-gray-900 px-4 py-2 m-2 text-base">
+                  <h4 class="text-lg leading-6 font-medium text-gray-200">👤 Human score: {{ humanScore }} pts </h4>
+
+                  <h1 class="text-6xl mt-20" v-if="humanChoose === 0">👊</h1>
+                  <h1 class="text-6xl mt-20" v-else-if="humanChoose === 1">🤚</h1>
+                  <h1 class="text-6xl mt-20" v-else-if="humanChoose === 2">✌️</h1>
+                  <h1 class="text-6xl mt-20" v-else-if="robotChoose === -1"><img class="text-center inline" src="https://johnjorgenson.com/wp-content/uploads/2018/05/colorful-loader-gif-transparent.gif"></h1>
+                  <h1 class="text-6xl mt-20" v-else></h1>
+
+                  <p class="text-center inline text-center mt-20">
+                      <div id="webcam-container"></div>
+					  <div id="label-container"></div>
+                  </p>
+              </div>
+              <!-- end human box --->
+
+              <!-- start robot box --->
+              <div class="items-center flex-1 text-gray-100 text-center bg-gray-900 px-4 py-2 m-2 text-base">
+                  <h4 class="text-lg leading-6 font-medium text-gray-200">🤖 Robot score: {{ robotScore }} pts </h4>
+
+                  <h1 class="text-6xl mt-20" v-if="robotChoose === 0">👊</h1>
+                  <h1 class="text-6xl mt-20" v-else-if="robotChoose === 1">🤚</h1>
+                  <h1 class="text-6xl mt-20" v-else-if="robotChoose === 2">✌️</h1>
+                  <h1 class="text-6xl mt-20" v-else-if="robotChoose === -1"><img class="text-center inline" src="img/loading.gif"></h1>
+                  <h1 class="text-6xl mt-20" v-else></h1>
+
+                  <p class="text-center mt-20">
+                      <img class="text-center inline" src="img/robot.svg" alt="Laracasts Sign Up Mascot">
+                  </p>
+              </div>
+              <!-- end robot box --->
+          </div>
+        </div>
+        <!-- end gameboard -->
+
+        <audio id="audioEffect1"><source src="./audio/lose.mp3" type="audio/mpeg" /></audio>
+        <audio id="audioEffect2"><source src="./audio/win.mp3" type="audio/mpeg" /></audio>
+        
+        <input hidden v-model="humanChoose" id="humanChoose">
+
+  </div>
+  <!-- end game -->
+</body>
+
+
+<script type="text/javascript">
+
+	// START teachablemachine code //
+    // More API functions here:
+    // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
+
+    // the link to your model provided by Teachable Machine export panel
+    const URL = "https://teachablemachine.withgoogle.com/models/l02IbpV7q/";
+
+    let model, webcam, labelContainer, maxPredictions;
+
+    // Load the image model and setup the webcam
+    async function init() 
+    {
+        const modelURL = URL + "model.json";
+        const metadataURL = URL + "metadata.json";
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
+
+        // Convenience function to setup a webcam
+        const flip = true; // whether to flip the webcam
+        webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
+        await webcam.setup(); // request access to the webcam
+        await webcam.play();
+
+
+        document.querySelector('#enableButton').classList.add("hidden");
+        document.querySelector('#playButton').classList.remove("hidden");
+        document.querySelector('#resetButton').classList.remove("hidden");
+        window.requestAnimationFrame(loop);
+
+        // append elements to the DOM
+        document.getElementById("webcam-container").appendChild(webcam.canvas).setAttribute("class", "text-center inline border-solid border-8 border-indigo-900");
+
+
+        labelContainer = document.getElementById("label-container");
+        for (let i = 0; i < maxPredictions; i++) { // and class labels
+            labelContainer.appendChild(document.createElement("div"));
+        }
+    }
+
+    async function loop() {
+        webcam.update(); // update the webcam frame
+        await predict();
+        window.requestAnimationFrame(loop);
+    }
+
+    // run the webcam image through the image model
+    async function predict() {
+        // predict can take in an image, video or canvas html element
+        let sign = "";
+        const prediction = await model.predict(webcam.canvas);
+        for (let i = 0; i < maxPredictions; i++) 
+        {
+        	if (prediction[i].className==0){sign="👊";}
+        	else if (prediction[i].className==1){sign="🤚";}
+        	else if (prediction[i].className==2){sign="✌️";}
+        	else { sign = "none"; }
+
+        	if (prediction[i].probability.toFixed(2)>0.80)
+        	{
+        		document.querySelector('#humanChoose').value=prediction[i].className;
+        	}
+
+            const classPrediction =
+                sign + "  : " + prediction[i].probability.toFixed(2);
+            labelContainer.childNodes[i].innerHTML = classPrediction;
+        }
+    }
+
+    // END teachablemachine code //
+
+
+    // START Vue JS + logic of the game code //
+    var game = new Vue({
+      el: '#game',
+      data: {
+         humanScore: 0,
+         humanChoose: '',
+         robotScore: 0,
+         robotChoose: ''
+      },
+
+      methods: 
+      {
+      	enableButton: function(){ init(); },
+
+        playButton: function ()
+        {
+          // Reset Chooses
+          this.robotChoose=-1;
+          this.humanChoose=-1;
+          document.getElementById('audioEffect1').pause(); 
+          document.getElementById('audioEffect2').pause(); 
+          document.getElementById('audioEffect1').currentTime = 0;
+          document.getElementById('audioEffect2').currentTime = 0;
+
+          // lil delay
+          setTimeout(() => 
+          {  
+          	  // Random robot sign
+              this.robotChoose = Math.floor(Math.random() * 3);
+              // Detect sign from human video
+              this.humanChoose = parseInt(document.querySelector('#humanChoose').value);
+              // Compare the output and increase score for the winner
+              this.checkWinner();
+          }, 2000);
+        },
+
+        // reset button
+        resetButton: function () 
+        {
+          this.humanScore=0;
+          this.robotScore=0;
+          this.robotChoose='';
+          this.humanChoose='';
+        },
+
+        // check Winner
+        checkWinner: function () 
+        {
+          if ((this.robotChoose!=this.humanChoose) && (isNaN(this.humanChoose)==false))
+          { 
+            // List of values:
+            // 0 = Rock 
+            // 1 = Paper 
+            // 2 = Scissors
+
+            // check who's winning
+            if (this.robotChoose==0 && this.humanChoose==1){ this.humanScore+=10; this.sound=1; }
+            else if (this.robotChoose==0 && this.humanChoose==2){ this.robotScore+=10; this.sound=2; }
+            else if (this.robotChoose==1 && this.humanChoose==2){ this.humanScore+=10; this.sound=1; }
+            else if (this.humanChoose==0 && this.robotChoose==1){ this.robotScore+=10; this.sound=2; }
+            else if (this.humanChoose==0 && this.robotChoose==2){ this.humanScore+=10; this.sound=1; }
+            else if (this.humanChoose==1 && this.robotChoose==2){ this.robotScore+=10; this.sound=2; }
+
+            // Play sound
+            if (this.sound==1){ document.getElementById('audioEffect1').play(); }
+            else { document.getElementById('audioEffect2').play(); }
+          }
+        }
+      }
+    })
+    // END Vue JS + logic of the game code //
+</script>
