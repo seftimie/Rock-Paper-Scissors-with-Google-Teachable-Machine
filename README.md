@@ -3,8 +3,6 @@
 - [Play the game](https://silviueftimiedev.web.app)
 - [Video Demo](https://www.youtube.com/watch?v=6poEnjJL0jI)
 
-Rock Paper Scissors with Google Teachable Machine, Vue JS, Tailwind CSS, Laracasts illustrations and Minions (sounds)
-
 I have used again the magic of Google to train a visual machine learning model and turn everything into a classic game for my kids: Rock Paper Scissors.
 
 #### Step 01: using Teachable Machine, Preparing training data (classes)
