@@ -36,7 +36,7 @@ Mix all things together. Add some sounds with Minions (winning/losing part).
 
 #### Step 06: test the game
 If everythings Ok... then upload all code on github and host the game on firebase hosting. 
-When playing, I recommand using a "white background" or (re)train with better images, export the model and then replace line 119: const URL = "https://teachablemachine.withgoogle.com/models/l02IbpV7q/"; from index.html with your model url.
+When playing, I recommand using a "white background" or (re)train with better images, export the model and then replace line 145: const URL = "https://teachablemachine.withgoogle.com/models/l02IbpV7q/"; from index.html with your model url.
 
 ![step01](https://github.com/seftimie/Rock-Paper-Scissors-with-Google-Teachable-Machine/raw/main/screens/6.jpg)
 
